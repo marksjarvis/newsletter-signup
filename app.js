@@ -3,6 +3,11 @@ const https = require("https");
 // No need to install https in node as it is a native module //
 const bodyParser = require("body-parser");
 
+require('dotenv').config({ path: 'vars/.env' });
+const MAPI_KEY = process.env.API_KEY
+const MLIST_ID = process.env.LIST_ID
+const MAPI_SERVER = process.env.API_SERVER
+
 const app = express();
 
 app.use(express.static("public"));
@@ -32,32 +37,32 @@ app.post("/", function (req, res) {
 
     const jsonData = JSON.stringify(data);
 
-    const url = "https://us21.api.mailchimp.com/3.0/lists/3b03a1189a";
+    const url = "https://" + MAPI_SERVER + ".api.mailchimp.com/3.0/lists/" + MLIST_ID;
 
     const options = {
         method: "POST",
-        auth: "mark1:216c85c57d746be733ccf7d41cd59d00-us21"
+        auth: "mark1:" + MAPI_KEY
     };
 
-    const request = https.request(url, options, function(response) {
+    const request = https.request(url, options, function (response) {
 
         if (response.statusCode === 200) {
             res.sendFile(__dirname + "/success.html");
-            //res.send("Successfully subscribed");
+
         } else {
             res.sendFile(__dirname + "/failure.html");
-            //res.send("There was an error in signing up. Please try again");
+
         }
-        response.on("data", function(data) {
+        response.on("data", function (data) {
             console.log(JSON.parse(data));
         })
     })
 
-    //request.write(jsonData);
+    // USE THIS FOR LOCALHOST request.write(jsonData);
     request.end();
 });
 
-app.post("/failure", function(req, res) {
+app.post("/failure", function (req, res) {
     res.redirect("/");
 })
 
@@ -65,8 +70,3 @@ app.listen(process.env.PORT || 3000, function () {
     console.log("Server is running on port 3000.");
 });
 
-// API Key
-// 216c85c57d746be733ccf7d41cd59d00-us21
-
-// List ID
-// 3b03a1189a
